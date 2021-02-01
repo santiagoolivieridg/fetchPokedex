@@ -1,4 +1,4 @@
 # fetchPokedex
-Fetch &amp; Async/Await exercise for CourseIT
+Search for your desired Pokémon by typing its name or number, then press 'Enter'
 
 Using PokeAPI -> https://pokeapi.co/
