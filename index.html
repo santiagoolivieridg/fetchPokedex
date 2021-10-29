@@ -3,54 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokedex</title>
+    <title>Pokédex</title>
+    <link rel="stylesheet" href="css/main.css">
 </head>
-<style>
-.pokedex {
-    position: relative;
-    background-color: #f15645;
-    height: 200px;
-    padding: 40px;
-    text-align: center;
-}
-
-input {
-    padding: 10px;
-    margin-bottom: 20px;
-    border: none;
-    border-radius: 4px;
-}
-
-.circle {
-    height: 100px;
-    width: 100px;
-    background-color: #f13c20;
-    border-radius: 50%;
-    border: 4px solid #FFF;
-    margin: auto;
-}
-
-p {
-    font-family: sans-serif;
-    text-transform: capitalize;
-    font-size: 1.4em;
-    color: #FFF;
-}
-</style>
 <body>
-    <div class="pokedex">
-        <input type="text" id="search" placeholder="Search Pokémon" onkeypress="findPokemon(event)">
-        <div id="circle" class="circle">
-            
+        <div class="header">
+            <p>SEARCH FOR A POKÉMON</p>
+            <input type="text" id="search" placeholder="Pokémon Name or Number" onkeypress="findPokemon(event)">
         </div>
-        <p id="name">name</p>
+        <div class="pokedex">
+            <aside id="frame">
+                
+            </aside>
+
+        <div class="data">
+            <header>
+                <div class="header_pkmn">
+                    <span id="pkmn_icon">
+                        <div></div>
+                    </span>
+                    <p>No. <span id="pkmn_number">?</span></p>
+                </div>
+                <div class="header_name">
+                    <p id="pkmn_name">?</p>
+                    <span class="pokeball_icon"></span>
+                </div>
+            </header>
+            <main id="main">
+                <div class="main_genus">
+                    <p id="pkmn_genus"></p>
+                </div>
+                <div class="main_types">
+                    <p>Type <span id="pkmn_types"></span></p>
+                </div>
+                <div id="pkmn_description">Pokémon Description</div>
+            </main>
+        </div>
     </div>
 </body>
 <script>
-    
+
+let frame = document.getElementById("frame")
+let frameHTML = frame.innerHTML
+
+let pkmnIcon = document.getElementById("pkmn_icon")
+let pkmnIconHTML = pkmnIcon.innerHTML
+
+let pkmnTypes = document.getElementById("pkmn_types")
+
     function findPokemon(e) {
         if (e.key === "Enter") {
-           fetchData(); 
+           fetchData();
+           while(pkmnTypes.firstChild){
+               pkmnTypes.removeChild(pkmnTypes.firstChild)
+           }
         }
     }
 
@@ -59,15 +65,39 @@ p {
         const data = await fetch(`https://pokeapi.co/api/v2/pokemon/${inputValue}`)
         const json = await data.json()
 
-        const name = json.name
-        const order = json.order
-        const image = json.sprites.front_default
+        const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${inputValue}`)
+        const speciesJson = await speciesData.json()
 
-        const circle = document.getElementById("circle")
-        const oldHTML = circle.innerHTML
+        const pokemonData = [
+            json.name,
+            json.id,
+            json.sprites.front_default,
+            json.sprites.other["official-artwork"].front_default,
+            speciesJson.genera[7].genus,
+            speciesJson.flavor_text_entries[7].flavor_text,
+            json.types]
+        
+        insertNewText("pkmn_name", pokemonData[0]);
+        insertNewText("pkmn_number", pokemonData[1]);
+        pkmnIcon.innerHTML = `<img src="${pokemonData[2]}" alt="${name} icon" id="pokemon">`
+        frame.innerHTML = `${frameHTML} <img src="${pokemonData[3]}" alt="${name} artwork" id="pokemon">`
+        insertNewText("pkmn_genus", pokemonData[4]);
+        insertNewText("pkmn_description", pokemonData[5])
 
-        document.getElementById("name").innerText = name + " #" + order
-        circle.innerHTML = `${oldHTML} <img src="${image}" alt="${name}" id="pokemon">`
+        loop(pokemonData[6]);
+    }
+
+    function insertNewText(element, newText) {
+            document.getElementById(element).innerText = newText
+    }
+    
+    function loop(arr) {
+        for (let i = 0; i < arr.length; i++){
+            const types = arr[i].type.name;
+            let pkmnTypesHTML = pkmnTypes.innerHTML
+
+            pkmnTypes.innerHTML = `${pkmnTypesHTML} <div class="${types}">${types}</div>`;
+        }
     }
 
 </script>
